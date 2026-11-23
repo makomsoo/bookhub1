@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paraqta Ultra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ===== НЕОН ДИЗАЙН ===== */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: #0a0a0f; color: #fff; min-height: 100vh; padding-bottom: 80px; overflow-x: hidden; }
+        
+        .glow { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.5; }
+        .g1 { width: 300px; height: 300px; background: #9d4edd; top: -50px; left: -100px; }
+        .g2 { width: 300px; height: 300px; background: #ff006e; bottom: -50px; right: -100px; }
+
+        .glass { background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(157, 78, 221, 0.4); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        
+        header { text-align: center; padding: 20px; font-size: 24px; font-weight: 800; color: #00f5d4; text-shadow: 0 0 15px #00f5d4; }
+
+        /* Мәзір */
+        .tab-content { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Кітаптар тізімі (20 кітап) */
+        .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .book-card { background: linear-gradient(135deg, #2a2a35, #1a1a25); padding: 15px; border-radius: 10px; border-left: 4px solid #00f5d4; cursor: pointer; transition: 0.3s; text-align: center; height: 110px; display: flex; flex-direction: column; justify-content: center; }
+        .book-card:hover { transform: translateY(-5px); box-shadow: 0 0 15px rgba(0, 245, 212, 0.4); border-left-color: #ff006e; }
+        .book-card h4 { font-size: 14px; margin-bottom: 5px; }
+        .book-card p { font-size: 11px; color: #aaa; }
+
+        /* Төменгі мәзір */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(20px); border-top: 1px solid #333; z-index: 99; }
+        .nav-btn { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: 0.3s; }
+        .nav-btn.active { color: #00f5d4; text-shadow: 0 0 10px #00f5d4; transform: translateY(-3px); }
+        .nav-btn i { font-size: 22px; }
+        .nav-btn span { font-size: 11px; }
+
+        /* Модаль (Кітап оқу режимі және Шам) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { width: 90%; max-width: 450px; text-align: center; padding: 30px; position: relative; }
+        
+        /* 3D Шам Анимациясы (Pure CSS) */
+        .lamp-container { position: relative; width: 120px; height: 140px; margin: 0 auto 20px; }
+        .lamp-glow { position: absolute; top: -20px; left: -50%; width: 200%; height: 150%; background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%); border-radius: 50%; opacity: 0.5; transition: opacity 0.5s; }
+        .lamp-body { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 50px; height: 90px; background: linear-gradient(to right, #222, #444, #222); border-radius: 25px 25px 5px 5px; z-index: 2; }
+        .lamp-flame { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 35px; height: 45px; background: linear-gradient(to top, #ff006e, #ffbf00); border-radius: 50% 50% 20% 20%; z-index: 1; box-shadow: 0 0 20px #ffbf00; transition: opacity 0.5s; animation: flicker 0.3s infinite alternate; }
+        @keyframes flicker { from { transform: translateX(-50%) scale(1) rotate(-2deg); opacity: 0.9; } to { transform: translateX(-50%) scale(1.05) rotate(2deg); opacity: 1; } }
+
+        .timer-box { font-size: 36px; font-weight: bold; color: #00f5d4; text-shadow: 0 0 15px #00f5d4; margin: 15px 0; }
+        .btn-main { padding: 12px 20px; border-radius: 10px; border: none; background: #ff006e; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px #ff006e; width: 100%; margin-top: 10px; transition: 0.3s; }
+        .btn-main:hover { transform: scale(1.02); }
+        .btn-secondary { padding: 12px 20px; border-radius: 10px; border: none; background: #333; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        
+        input, textarea { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: 1px solid #555; background: #222; color: white; outline: none; }
+        textarea { resize: none; }
+
+        /* Чат және ИИ бөлімі */
+        .chat-box { height: 300px; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 15px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 13px; }
+        .msg.user { background: #00f5d4; color: #000; align-self: flex-end; border-bottom-right-radius: 0; }
+        .msg.ai { background: #9d4edd; color: #fff; align-self: flex-start; border-bottom-left-radius: 0; }
+
+        /* Алмасу бөлімі */
+        .market-card { background: #1a1a25; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #ff006e; }
+        .market-card h4 { color: #00f5d4; margin-bottom: 5px; }
+        .market-card p { font-size: 12px; color: #ccc; margin-bottom: 3px; }
+        .contact-btn { display: inline-block; background: #27ae60; color: white; padding: 5px 15px; border-radius: 5px; text-decoration: none; font-size: 12px; margin-top: 10px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+
+    <header><i class="fas fa-book-open"></i> Paraqta Ultra</header>
+
+    <!-- 1. КІТАПХАНА (20 КІТАП) -->
+    <div id="tab-books" class="tab-content active">
+        <h3 style="margin-bottom: 15px; color: #ff006e;">Оқуға ұсынылатын 20 кітап</h3>
+        <div class="books-grid" id="book-list">
+            <!-- Кітаптар JS арқылы автоматты түрде шығады -->
+        </div>
+    </div>
+
+    <!-- 2. ИИ КӨМЕКШІ (Кеңесші) -->
+    <div id="tab-ai" class="tab-content">
+        <div class="glass" style="padding: 20px;">
+            <h3 style="color: #00f5d4; margin-bottom: 10px;"><i class="fas fa-robot"></i> Кітап Кеңесшісі (ИИ)</h3>
+            <div class="chat-box" id="ai-chat">
+                <div class="msg ai">Сәлеметсіз бе! Мен кітап кеңесшісімін. Қандай жанрдағы кітап оқығыңыз келеді? (Мысалы: фантастика, детектив, тарихи)</div>
+            </div>
+            <input type="text" id="ai-input" placeholder="Сұрағыңызды жазыңыз..." onkeypress="if(event.key==='Enter') sendAIMessage()">
+            <button class="btn-main" onclick="sendAIMessage()">Сұрау</button>
+        </div>
+    </div>
+
+    <!-- 3. АЛМАСУ (Маркет) -->
+    <div id="tab-market" class="tab-content">
+        <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+            <h3 style="color: #00f5d4; margin-bottom: 10px;"><i class="fas fa-plus-circle"></i> Кітапты алмасуға/сатуға қосу</h3>
+            <input type="text" id="m-title" placeholder="Кітап атауы">
+            <input type="text" id="m-price" placeholder="Бағасы (немесе 'Айырбастау')">
+            <input type="text" id="m-address" placeholder="Мекенжайыңыз (қала, аудан)">
+            <input type="text" id="m-phone" placeholder="Телефон нөміріңіз (мыс: 87071234567)">
+            <button class="btn-main" onclick="addMarketItem()">Жариялау</button>
+        </div>
+        <h3 style="margin-bottom: 15px; color: #ff006e;">Белсенді жарнамалар</h3>
+        <div id="market-list"></div>
+    </div>
+
+    <!-- 4. ПРОФИЛЬ -->
+    <div id="tab-profile" class="tab-content">
+        <div class="glass" style="padding: 30px; text-align: center;">
+            <i class="fas fa-user-astronaut" style="font-size: 70px; color: #9d4edd; text-shadow: 0 0 20px #9d4edd; margin-bottom: 15px;"></i>
+            <h2>Кітап сүйер қауым</h2>
+            <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid #333;">
+                <p style="color: #aaa; font-size: 14px;">Жалпы оқылған бет</p>
+                <p style="font-size: 30px; font-weight: bold; color: #00f5d4;">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Төменгі мәзір -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('tab-books', this)"><i class="fas fa-book"></i><span>Кітапхана</span></button>
+        <button class="nav-btn" onclick="switchTab('tab-ai', this)"><i class="fas fa-robot"></i><span>ИИ Кеңесші</span></button>
+        <button class="nav-btn" onclick="switchTab('tab-market', this)"><i class="fas fa-exchange-alt"></i><span>Алмасу</span></button>
+        <button class="nav-btn" onclick="switchTab('tab-profile', this)"><i class="fas fa-user"></i><span>Профиль</span></button>
+    </nav>
+
+    <!-- КІТАП ОҚУ РЕЖИМІ (Шам мен Таймер) -->
+    <div class="modal" id="read-modal">
+        <div class="modal-content glass">
+            <!-- 3D Шам -->
+            <div class="lamp-container">
+                <div class="lamp-glow" id="lamp-glow"></div>
+                <div class="lamp-flame" id="lamp-flame"></div>
+                <div class="lamp-body"></div>
+            </div>
+            
+            <h2 id="r-title" style="color: #00f5d4;">Кітап атауы</h2>
+            <p id="r-text" style="color: #aaa; font-size: 14px; margin: 15px 0; line-height: 1.6; max-height: 100px; overflow-y: auto;">Мұнда кітаптың қысқаша үзіндісі шығады. Оқу режимі қалай жұмыс істейтінін көрсету үшін.</p>
+            
+            <div class="timer-box" id="timer">25:00</div>
+            <button class="btn-main" onclick="toggleTimer()" id="t-btn"><i class="fas fa-play"></i> Оқуды бастау</button>
+            
+            <button class="btn-secondary" onclick="closeReadModal()" style="margin-top: 15px;">Жабу</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== ДЕРЕКТЕР =====
+        const booksData = [
+            { title: "Абай жолы", author: "Мұхтар Әуезов" },
+            { title: "Көшпенділер", author: "Ілияс Есенберлин" },
+            { title: "Қан мен тер", author: "Әбдіжәміл Нұрпейісов" },
+            { title: "Гарри Поттер", author: "Дж.К. Роулинг" },
+            { title: "Агата Кристи", author: "Шығыс экспрессі" },
+            { title: "Кішкентай ханзада", author: "Антуан де Сент-Экзюпери" },
+            { title: "Қыз Жібек", author: "Халық эпосы" },
+            { title: "Оян, қазақ!", author: "Міржақып Дулатов" },
+            { title: "Аққан жұлдыз", author: "Софы Сматаев" },
+            { title: "Балуан Шолақ", author: "Сәбит Мұқанов" },
+            { title: "Робинзон Крузо", author: "Даниэль Дефо" },
+            { title: "Шерлок Холмс", author: "Артур Конан Дойл" },
+            { title: "Уақытпен санаспау", author: "Жүсіпбек Аймауытов" },
+            { title: "Ақбілек", author: "Жүсіпбек Аймауытов" },
+            { title: "Менің атым Қожа", author: "Бердібек Соқпақбаев" },
+            { title: "Гарри Поттер 2", author: "Дж.К. Роулинг" },
+            { title: "Үш арқар", author: "Мұхтар Әуезов" },
+            { title: "Жұлдыздар жарығы", author: "Ғабит Мүсірепов" },
+            { title: "Тау тұлғасы", author: "Мұқағали Мақатаев" },
+            { title: "Қара сөздер", author: "Абай Құнанбаев" }
+        ];
+
+        // ===== НАВИГАЦИЯ =====
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // ===== 1. КІТАПХАНА (20 КІТАПТЫ ШЫҒАРУ) =====
+        function loadBooks() {
+            const list = document.getElementById('book-list');
+            booksData.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.onclick = () => openBook(book.title, book.author);
+                card.innerHTML = <h4>${book.title}</h4><p>${book.author}</p>;
+                list.appendChild(card);
+            });
+        }
+
+        // ===== 2. КІТАП ОҚУ РЕЖИМІ ЖӘНЕ ТАЙМЕР =====
+        let timerInterval, timeLeft = 25 * 60, isRunning = false;
+
+        function openBook(title, author) {
+            document.getElementById('r-title').innerText = title;
+            document.getElementById('r-text').innerText = "${title}" кітабынан үзінді... (Авторы: ${author}). Бұл жерде нақты мәтін болады. Оқу барысында шам жанып, уақыт саналады.;
+            document.getElementById('read-modal').style.display = 'flex';
+            resetTimer();
+        }
+
+        function closeReadModal() {
+            document.getElementById('read-modal').style.display = 'none';
+            clearInterval(timerInterval);
+            isRunning = false;
+            resetTimer();
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 25 * 60;
+            updateTimerUI();
+            document.getElementById('t-btn').innerHTML = '<i class="fas fa-play"></i> Оқуды бастау';
+            document.getElementById('t-btn').style.background = '#ff006e';
+            // Шамды өшіру
+            document.getElementById('lamp-flame').style.opacity = '0.1';
+            document.getElementById('lamp-glow').style.opacity = '0.1';
+        }
+
+        function updateTimerUI() {
+            let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            let s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = ${m}:${s};
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                document.getElementById('t-btn').innerHTML = '<i class="fas fa-play"></i> Жалғастыру';
+                // Шамды бәсеңдету
+                document.getElementById('lamp-flame').style.opacity = '0.3';
+                document.getElementById('lamp-glow').style.opacity = '0.3';
+            } else {
+                isRunning = true;
+                document.getElementById('t-btn').innerHTML = '<i class="fas fa-pause"></i> Тоқтату';
+                document.getElementById('t-btn').style.background = '#9d4edd';
+                // Шамды жағу (Анимация)
+                document.getElementById('lamp-flame').style.opacity = '1';
+                document.getElementById('lamp-glow').style.opacity = '1';
+                
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerUI();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        alert("25 минут бітті! Керемет жұмыс!");
+                        resetTimer();
+                    }
+                }, 1000);
+            }
+        }
+
+        // ===== 3. ИИ КЕҢЕСШІ (Симуляция) =====
+        function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const text = input.value.trim().toLowerCase();
+            if (!text) return;
+
+            const chatBox = document.getElementById('ai-chat');
+            
+            // Пайдаланушы хабарламасы
+            const userMsg = document.createElement('div');
+            userMsg.className = 'msg user';
+            userMsg.innerText = text;
+            chatBox.appendChild(userMsg);
+            input.value = '';
+
+            // ИИ жауабы (Дайын сөздік арқылы)
+            setTimeout(() => {
+                let reply = "Кешіріңіз, мен әзірге тек негізгі жанрларды түсінемін. Маған 'детектив', 'фантастика' немесе 'тарихи' деп жазсаңыз, мен кеңес беремін.";
+                
+                if (text.includes('детектив') || text.includes('кристи') || text.includes('холмс')) {
+                    reply = "Сізге Агата Кристидің 'Шығыс экспрессіндегі қылмыс' кітабын немесе Артур Конан Дойлдың 'Шерлок Холмс' жинағын оқуды ұсынамын. Бұл детектив жанрының алтын қоры!";
+                } else if (text.includes('фантаст') || text.includes('гарри') || text.includes('поттер')) {
+                    reply = "Фантастика сүйер қауымға Дж.К. Роулингтің 'Гарри Поттер' сериясын немесе Антуан де Сент-Экзюперидің 'Кішкентай ханзадасын' ұсынамын.";
+                } else if (text.includes('тарих') || text.includes('қазақ') || text.includes('абай')) {
+                    reply = "Тарихи кітаптар үшін Мұхтар Әуезовтің 'Абай жолы' эпопеясын, Ілияс Есенберлиннің 'Көшпенділер' трилогиясын оқып көріңіз. Отандық әдебиеттің мақтанышы!";
+                }
+
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'msg ai';
+                aiMsg.innerText = reply;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 800); // 0.8 секунд күту (ойланғандай)
+        }
+
+        // ===== 4. КІТАП АЛМАСУ (Телефон және Мекенжай арқылы) =====
+        function addMarketItem() {
+            const title = document.getElementById('m-title').value.trim();
+            const price = document.getElementById('m-price').value.trim();
+            const address = document.getElementById('m-address').value.trim();
+            const phone = document.getElementById('m-phone').value.trim();
+
+            if (!title || !price || !phone) {
+                return alert("Кітап атын, бағасын және телефон нөмірін толтырыңыз!");
+            }
+
+            const list = document.getElementById('market-list');
+            const card = document.createElement('div');
+            card.className = 'market-card';
+            
+            // Телефон нөміріне сілтеме (телеграмға немесе қоңырауға)
+            card.innerHTML = `
+                <h4>${title}</h4>
+                <p><b>Бағасы:</b> ${price}</p>
+                <p><b>Мекенжай:</b> ${address || 'Көрсетілмеген'}</p>
+                <p><b>Телефон:</b> ${phone}</p>
+                <a href="tel:${phone}" class="contact-btn"><i class="fas fa-phone"></i> Қоңырау шалу</a>
+                <a href="https://t.me/+${phone}" target="_blank" class="contact-btn" style="background: #0088cc;"><i class="fab fa-telegram-plane"></i> Телеграм</a>
+            `;
+            list.prepend(card); // Жаңа жарнаманы жоғарыға шығару
+
+            document.getElementById('m-title').value = '';
+            document.getElementById('m-price').value = '';
+            document.getElementById('m-address').value = '';
+            document.getElementById('m-phone').value = '';
+        }
+
+        // Бастапқы жүктеу
+        window.onload = () => {
+            loadBooks();
+        };
+    </script>
+</body>
+</html>
